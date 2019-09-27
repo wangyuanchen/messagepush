@@ -1,0 +1,6 @@
+server:
+  port: 1203
+
+spring:
+  application:
+    name: message-push

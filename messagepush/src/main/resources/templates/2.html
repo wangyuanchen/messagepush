@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/sockjs-client/1.4.0/sockjs.min.js"></script>
+    <script src="https://cdn.bootcss.com/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+<h2>我滴天</h2>
+<input id="start">
+<input id="message">
+<iframe id="my_iframe" style="display:none;"></iframe>
+</body>
+<script>
+    var sock = new SockJS('http://127.0.0.1:8081/websocket?token=' + '0b2723a4-02d0-4f9c-8e4f-9ae959da7185');  //连接节点
+    var stomp = Stomp.over(sock);
+    stomp.connect({}, function(frame){
+        console.log('Connected:你好' + frame);
+        //连接成功后订阅消息接口
+        //订阅个人消息
+        stomp.subscribe('/user/queue/msg/new', function(response){
+            console.log("wyc");
+            var result = response.body;
+            $("#message").val(result);
+        });
+        //消息发送结果
+        stomp.subscribe('/user/queue/msg/result', function(response){
+            console.log("消息发送结果2");
+
+        });
+
+        //订阅广播消息
+        stomp.subscribe('/topic/notice', function(response){
+            console.log("你好wyc");
+            var result = response.body;
+            $("#message").val(result);
+        });
+    });
+
+    //发送广播
+    stomp.send('/app/addNotice', {}, '广播内容');
+    //发送消息
+    var msg = {
+        toName: '接收人',
+        content: '消息内容'
+    };
+    stomp.send('/app/msg', {}, JSON.stringify(msg));
+
+</script>
+</html>
